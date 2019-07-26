@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+{% load bootstrap3 %}
+
+{% block content %}   
+
+    <div style="text-align:left;">
+        <h1>투자비 전산화</h1>
+    </div>
+
+    <div style="text-align:right;">
+        <hr />
+        <button id="excel" class="btn btn-primary">엑셀 다운로드</button>
+        <button id="save" class="btn btn-primary">저장</button>
+    </div>
+
+    <div id="example" style="width:1600px; max-width:1600px; height: 500px; overflow: hidden"></div>
+        <script>
+            var container = document.getElementById('example');
+            
+            var data = [                    
+                {% for invest in invest_list %}
+                    {
+                        team:'{{invest.team}}', cat:'{{invest.cat}}', lev3:'{{invest.lev3}}', lev4:'{{invest.lev4}}',
+                        col_A:'{{invest.col_A}}', col_B:'{{invest.col_B}}', col_C:'{{invest.col_C}}', col_D:'{{invest.col_D}}',
+                        col_E:'{{invest.col_E}}', col_F:'{{invest.col_F}}', col_G:'{{invest.col_G}}', col_H:'{{invest.col_H}}',
+                        col_I:'{{invest.col_I}}', col_J:'{{invest.col_J}}', col_K:'{{invest.col_K}}', col_L:'{{invest.col_L}}',
+                        col_M:'{{invest.col_M}}', col_N:'{{invest.col_N}}', col_O:'{{invest.col_O}}',
+                        update_date:'{{invest.updated_at}}'
+                    },
+                {% endfor %}
+            ];
+            
+            var column = [
+                {% for column in column_list %}
+                    {data:'{{column.col_data}}', title:'{{column.col_title}}'},                
+                {% endfor %}
+                {data:'update_date', title:'갱신일'}
+            ];
+    
+            var settings = {
+                    manualColumnMove: true,
+                    manualRowMove: true,
+                    data: data,
+                    columns: column,
+                    rowHeaders: true,
+                    colHeaders: true,
+                    width: '100%',
+                    stretchH: "all",
+                    filters: true,
+                    dropdownMenu: true,
+                    manualColumnResize: true,
+                    manualRowResize: true,
+                    minSpareRows: 5,
+                    licenseKey: 'non-commercial-and-evaluation'
+            };  
+
+            var hot = new Handsontable(container, settings);            
+            
+            $('#save').click(function(){
+                        
+                        var raw_grid_data = hot.getData();                        
+                        var col_data_simple = [];
+                        var col_data_full = [];
+                        var grid_array = [];
+                        var grid_send = [];
+                
+                        var col_header = hot.getColHeader();
+                        for (var i=0 ; i < col_header.length ; i++) {
+                            var col_data_obj = {};
+                            var col_temp = column.
+                                           filter(function(item){ return item.title === col_header[i]; });
+                            col_data_simple.push(col_temp[0]['data']);
+                            col_data_obj['title'] = col_header[i];
+                            col_data_obj['data'] = col_temp[0]['data'];
+                            col_data_full.push(col_data_obj); 
+                        };    
+                
+                        for (var i=0 ; i< raw_grid_data.length ; i++) {                            
+                            if (!hot.isEmptyRow(i)) {
+                                var grid_row = {};
+                                for (var j=0 ; j< raw_grid_data[i].length ; j++) {
+                                    grid_row[col_data_simple[j]] = raw_grid_data[i][j];                                     
+                                }
+                                grid_send.push(grid_row);                                 
+                            }
+                        };
+                        
+                        var url = "{% url 'invest:invest_new' %}";                
+                        $.post(url, JSON.stringify(grid_send))
+                            .done(function(obj){
+                                console.log(obj);
+                                window.location.replace("{% url 'invest:invest_list' %}");
+                            })
+                            .fail(function(xhr,textStatus,error){
+                               alert('failed : '+error);
+                            })
+                        
+            });
+            
+        </script>
+
+{% endblock %}
