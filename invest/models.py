@@ -32,4 +32,7 @@ class Email(models.Model):
     to = models.EmailField(null=False, blank=False)
     subject_text = models.CharField(max_length=500,blank=False)
     body_text = models.TextField(blank=True)
+
+class AutoCat(models.Model):
+    auto_cat = models.CharField(max_length=100,blank=True)
     

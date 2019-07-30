@@ -33,9 +33,20 @@
                 {% endfor %}
             ];
             
+            var auto_cat_list = [
+                {% for auto in auto_cat_list %}
+                    '{{auto.auto_cat}}',
+                {% endfor %}
+            ];
+            
             var column = [
                 {% for column in column_list %}
-                    {data:'{{column.col_data}}', title:'{{column.col_title}}', show:'{{column.col_show}}'},                
+                        {% ifequal column.col_data 'cat' %}
+                            {data:'{{column.col_data}}', title:'{{column.col_title}}', show:'{{column.col_show}}',
+                             type:'autocomplete', source:auto_cat_list, strict: false, trimDropdown: false},
+                        {% else %}
+                            {data:'{{column.col_data}}', title:'{{column.col_title}}', show:'{{column.col_show}}'},
+                        {% endifequal %}
                 {% endfor %}
             ];
             
@@ -66,17 +77,38 @@
                       columns: hidden_col,
                       indicators: true
                     },
+                    columnSorting: true,
+                    language: 'ko-KR',
                     licenseKey: 'non-commercial-and-evaluation'
             };  
 
             var hot = new Handsontable(container, settings);
+            
+            var exportPlugin = hot.getPlugin('exportFile');
+
+            $('#excel').click(function(){
+                exportPlugin.downloadFile('csv', {
+                  bom: true,
+                  columnDelimiter: ',',
+                  columnHeaders: true,
+                  exportHiddenColumns: true,
+                  exportHiddenRows: true,
+                  fileExtension: 'csv',
+                  filename: 'Invest-CSV-file_[YYYY]-[MM]-[DD]',
+                  mimeType: 'text/csv',
+                  rowDelimiter: '\r\n',
+                  rowHeaders: true
+                });
+            });
+
             
             $('#view').click(function(){
                 window.location.replace("{% url 'invest:invest_list' %}"); 
             });
            
             $('#save').click(function(){
-                        
+                return confirm("현재 화면의 데이터를 저장하시겠습니까?");
+                
                         var raw_grid_data = hot.getData();                        
                         var col_data_simple = [];
                         var col_data_full = [];

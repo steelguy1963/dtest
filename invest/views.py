@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.template import loader
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from .models import Invest, Column, Email
+from .models import Invest, Column, Email, AutoCat
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.core.mail import EmailMessage
@@ -10,7 +10,8 @@ from django.urls import reverse
 def invest_list(request):
     invest_list = Invest.objects.all()
     column_list = Column.objects.all()
-    return render(request, 'invest/invest_list.html', {'invest_list': invest_list, 'column_list': column_list})
+    auto_cat_list = AutoCat.objects.all().order_by('auto_cat')
+    return render(request, 'invest/invest_list.html', {'invest_list': invest_list, 'column_list': column_list, 'auto_cat_list': auto_cat_list})
 
 @csrf_exempt
 def invest_new(request):
