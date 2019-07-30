@@ -4,5 +4,6 @@ from . import views
 urlpatterns = [
     url(r'^$', views.invest_list, name='invest_list'),
     url(r'^new/$', views.invest_new, name='invest_new'), 
-    url(r'^column/$', views.invest_new_column, name='invest_new_column'), 
+    url(r'^column/$', views.invest_new_column, name='invest_new_column'),
+    url(r'^email/$', views.invest_new_email, name='invest_new_email'), 
 ]

@@ -22,8 +22,14 @@ class Invest(models.Model):
     col_M = models.CharField(max_length=100,blank=True)
     col_N = models.CharField(max_length=100,blank=True)
     col_O = models.CharField(max_length=100,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 class Column(models.Model):
     col_data = models.CharField(max_length=100,blank=True)
     col_title = models.CharField(max_length=100,blank=True)
+    col_show = models.IntegerField(blank=True)
+    
+class Email(models.Model):
+    to = models.EmailField(null=False, blank=False)
+    subject_text = models.CharField(max_length=500,blank=False)
+    body_text = models.TextField(blank=True)
+    

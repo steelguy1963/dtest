@@ -1,9 +1,11 @@
 from django.shortcuts import render
 from django.template import loader
-from django.http import HttpResponse, JsonResponse
-from .models import Invest, Column
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
+from .models import Invest, Column, Email
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.core.mail import EmailMessage
+from django.urls import reverse
 
 def invest_list(request):
     invest_list = Invest.objects.all()
@@ -37,7 +39,6 @@ def invest_new(request):
                 col_N = b.get('col_N'),
                 col_O = b.get('col_O')
             ).save()
-            print(str(b))
         return HttpResponse(body)
 
 @csrf_exempt
@@ -46,8 +47,24 @@ def invest_new_column(request):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         for b in body:
-            #Invest(
-                #team = b.get('team'),
-            #).save()
-            print(str(b))
+            Column(
+                col_data = b.get('data'),
+                col_title = b.get('title'),
+                col_show = b.get('show')
+            ).save()
         return HttpResponse(body)
+
+@csrf_exempt
+def invest_new_email(request):
+        invest_list = Invest.objects.all()
+        column_list = Column.objects.all()
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        to_list = ['sextansgamma@gmail.com']
+        to_list.append(body['to'])
+        body_new = body['body_text'] + '\n' + '\n' + '다음 링크를 클릭하여 데이터를 입력하시기 바랍니다' + '\n' + 'https://dtest.run.goorm.io/invest/' + '\n'
+        email = EmailMessage(body['subject_text'],body_new,to=to_list)
+        if(email.send()):
+            return HttpResponseRedirect(reverse('invest:invest_list'))
+        else:
+            print('There was an error sending an email.') 
